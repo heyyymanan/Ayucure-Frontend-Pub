@@ -113,6 +113,7 @@ export default function CheckoutForm({
     <div className="flex-1 space-y-6 max-w-3xl mx-auto font-sans">
       {/* Contact */}
       <div>
+        <h2 className="font-semibold text-sm mb-2 flex gap-2 items-center text-red-600">Note For Exsisting Users : If You've Logged-in Earlier & Dont See Your Prefilled Address, Please Logout and Login Again!</h2>
         <h2 className="font-semibold text-lg mb-2 flex gap-2 items-center">Email Address :<p className="text-grey text-base">(optional)</p></h2>
         <input
           type="email"
