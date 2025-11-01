@@ -88,7 +88,7 @@ export default function CheckoutForm({
       ...prev,
       [`${section === "contact" ? "contactEmail" : `delivery_${field}`}`]: error,
     }));
-  };
+  }; 
 
   if (cart.length === 0) {
     return (

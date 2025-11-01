@@ -16,6 +16,8 @@ const AddToCartButton = ({ product, variantSku, ref }) => {
 
   const cartItem = cart.find((item) => item.variantSku === variantSku);
 
+  // console.log(product)
+
   // 🔔 Emit a custom 'storage' event manually
   const triggerStorageEvent = () => {
     window.dispatchEvent(new StorageEvent('storage', {

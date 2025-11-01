@@ -5,7 +5,7 @@ import Category from "@/components/category.jsx";
 import ProductCard from "@/components/ui/product_card.jsx";
 import ProductCardSkeleton from "@/components/ui/product-card-skeleton.jsx";
 import { useEffect, useState, useRef } from "react";
-import { fetchProducts } from "@/lib/api/products.js";
+import { fetchProducts } from "@/lib/api/fetch-products.js";
 import { Fire } from "@/components/ui/fire";
 
 export default function Home() {
@@ -26,7 +26,7 @@ export default function Home() {
         const women = await fetchProducts({ tag: "women", limit: 7 });
         const skin = await fetchProducts({ tag: "skin-care", limit: 7 });
 
-        
+        // console.log(trending)
 
         setTrendingProducts(trending);
         setHealthyProducts(healthy);

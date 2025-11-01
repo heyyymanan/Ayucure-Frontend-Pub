@@ -12,6 +12,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 const ProductCard = ({ product }) => {
 
+  
+
   const fullStars = Math.floor(product.rating);
   const hasHalfStar = product.rating % 1 !== 0;
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);

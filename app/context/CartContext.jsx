@@ -37,6 +37,8 @@ export const CartProvider = ({ children }) => {
         return [
           ...prevCart,
           {
+            collection_id: product.collection_id,
+            shprkt_id: variant.shiprocket_variant_id,
             productId: product._id,
             variantSku: variant.sku,
             name: product.name,
