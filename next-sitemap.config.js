@@ -14,10 +14,13 @@ module.exports = {
     '/payment-pending',
     '/test',
     '/order-success',
+    '/checkout-fallback',
     '/onboarding',
     '/user/my-orders',
     '/user/my-wishlist',
-    '/user/my-profile'
+    '/user/my-profile',
+    '/user'
+
   ],
 
   additionalPaths: async () => {
