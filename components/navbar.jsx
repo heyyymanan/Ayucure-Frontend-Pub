@@ -22,7 +22,7 @@ const Navbar = () => {
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
 
   const userMenuRef = useRef(null);
   const { cart } = useCart();
@@ -38,7 +38,7 @@ const Navbar = () => {
   useEffect(() => {
     const checkLogin = () => {
       setIsLoggedIn(localStorage.getItem("isLoggedin") === "true");
-      
+
     };
 
     checkLogin();
@@ -70,7 +70,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      setLoading(true); 
+      setLoading(true);
 
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/users/logout`,
@@ -84,14 +84,14 @@ const Navbar = () => {
 
       setIsUserOpen(false);
       setIsLoggedIn(false);
-      
+
 
       router.push("/");
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
       alert("Logout Error");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -153,36 +153,35 @@ const Navbar = () => {
               </span>
             </div>
           </Link>
+        {/*
+        <div className="relative ml-2" ref={userMenuRef}>
+          {isLoggedIn ? (
+            <HugeiconsIcon
+              onClick={() => setIsUserOpen(!isUserOpen)}
+              icon={User03Icon}
+              size={isMobile ? 20 : 25}
+              color="currentColor"
+              strokeWidth={2}
+              className="cursor-pointer"
+            />
+          ) : (
+            isMobile ? <></> : <OTPOnClick />
+          )}
+        */}
 
-          {/* User */}
-          <div className="relative ml-2" ref={userMenuRef}>
-            {isLoggedIn ? (
-              <HugeiconsIcon
-                onClick={() => setIsUserOpen(!isUserOpen)}
-                icon={User03Icon}
-                size={isMobile ? 20 : 25}
-                color="currentColor"
-                strokeWidth={2}
-                className="cursor-pointer"
-              />
-            ) : (
-              isMobile ? <></> : <OTPOnClick />
-            )}
-
-            {/* Dropdown */}
-            {isUserOpen && (
-              <div className="absolute right-0 top-10 bg-white text-black rounded shadow-md z-50 w-48 py-2">
-                <div className="px-4 py-2 font-semibold border-b">Hi!</div>
-                <Link href="/user/my-orders" className="block px-4 py-2 hover:bg-gray-100">My Orders</Link>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
+        {/* Dropdown */}
+        {isUserOpen && (
+          <div className="absolute right-0 top-10 bg-white text-black rounded shadow-md z-50 w-48 py-2">
+            <div className="px-4 py-2 font-semibold border-b">Hi!</div>
+            <Link href="/user/my-orders" className="block px-4 py-2 hover:bg-gray-100">My Orders</Link>
+            <button
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
+            >
+              Logout
+            </button>
           </div>
+        )}
 
           {/* Mobile Menu Toggle */}
           <div className="lg:hidden block cursor-pointer">
@@ -212,9 +211,7 @@ const Navbar = () => {
             <Link href="/cart" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-gray-300 text-center border py-1">
               🛒 My Cart
             </Link>
-          ) : (
-            <OTPOnClick />
-          )}
+          ) : null}
         </div>
       )}
 
