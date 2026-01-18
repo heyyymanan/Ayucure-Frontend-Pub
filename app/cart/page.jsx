@@ -67,7 +67,6 @@ const CartPage = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             cart_data: { items: cartItems },
-            redirect_url: "http://localhost:3000/order-success", // ✅ Change this when deployed
             timestamp: new Date().toISOString(),
           }),
         }

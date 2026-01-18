@@ -6,9 +6,10 @@ import { OrderConfirmed } from '@/components/ui/order_confirmed'
 import Link from 'next/link'
 import { Button } from './ui/button'
 
+
 export default function ThankYouClient() {
   const searchParams = useSearchParams()
-  const orderId = searchParams.get('orderId')
+  const orderId = searchParams.get('oid')
   const router = useRouter()
 
   useEffect(() => {
@@ -24,9 +25,9 @@ export default function ThankYouClient() {
       <OrderConfirmed />
       <h1 className="text-3xl font-bold text-green-500 font-serif">Order Confirmed !</h1>
       <p className="mt-2 text-lg text-gray-700">Thank You For Your Purchase! 🛒</p>
-      <p className="mt-1 text-sm text-gray-500">
+      {/* <p className="mt-1 text-sm text-gray-500">
         Your Order ID : #<strong>{orderId}</strong>
-      </p>
+      </p> */}
       <br/>
       <p className='text-red-500 text-center'>We Will Update You Through <br/><strong>Whatsapp</strong> Or <strong>SMS</strong> Now.</p>
       <div className="flex items-center justify-center mt-10">
