@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
@@ -34,7 +36,7 @@ export default function HealthCategories() {
   const categoryRefs = useRef([]);
 
   useEffect(() => {
-    const elements = categoryRefs.current; // snapshot the refs
+    const elements = categoryRefs.current;
 
     gsap.fromTo(
       elements,
@@ -44,7 +46,7 @@ export default function HealthCategories() {
         opacity: 1,
         duration: 1,
         ease: "power2.out",
-        stagger: 0.1, // optional: makes animation feel nicer
+        stagger: 0.1,
       }
     );
 
@@ -61,15 +63,13 @@ export default function HealthCategories() {
             ref={(el) => (categoryRefs.current[index] = el)}
             className="flex flex-col items-center text-center hover:cursor-pointer"
           >
-            <div>
-              <Image
-                src={category.src}
-                alt={category.alt}
-                width={175}
-                height={175}
-                className="size-160 hover:shadow-2xl rounded-full"
-              />
-            </div>
+            <Image
+              src={category.src}
+              alt={category.alt}
+              width={175}
+              height={175}
+              className="size-160 hover:shadow-2xl rounded-full"
+            />
             <p className="lg:mt-2 lg:text-2xl text-[12px] mt-2 font-semibold text-white">
               {category.title}
             </p>
