@@ -9,7 +9,7 @@ import { Button } from './ui/button'
 
 export default function ThankYouClient() {
   const searchParams = useSearchParams()
-  const orderId = searchParams.get('oid')
+  const orderId = searchParams.get('orderId')
   const router = useRouter()
 
   useEffect(() => {

@@ -7,6 +7,7 @@ import Link from "next/link.js";
 import { Button } from "@/components/ui/button.jsx";
 import { useRouter } from "next/navigation.js";
 import CheckoutComponent from "@/components/shprkt_chkout_btn.jsx";
+import { getOrCreateGuestSessionId } from "@/lib/utils/getSessionId.jsx";
 
 const CartPage = () => {
   const router = useRouter();
@@ -21,7 +22,7 @@ const CartPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
-  const [token, setToken] = useState(null);
+  // const [token, setToken] = useState(null);
 
   useEffect(() => {
     setIsLoading(false);
@@ -60,24 +61,24 @@ const CartPage = () => {
         quantity: item.quantity,
       }));
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/general/shiprocket/generate-access-token`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cart_data: { items: cartItems },
-            timestamp: new Date().toISOString(),
-          }),
-        }
-      );
+      //     const response = await fetch(
+      //       `${process.env.NEXT_PUBLIC_API_URL}/general/shiprocket/generate-access-token`,
+      //       {
+      //         method: "POST",
+      //         headers: { "Content-Type": "application/json" },
+      //         body: JSON.stringify({
+      //           cart_data: { items: cartItems },
+      //           timestamp: new Date().toISOString(),
+      //         }),
+      //       }
+      //     );
 
-      const data = await response.json();
-      if (!response.ok || !data?.data?.token) {
-        throw new Error(data?.message || "Failed to generate token");
-      }
+      //     const data = await response.json();
+      //     if (!response.ok || !data?.data?.token) {
+      //       throw new Error(data?.message || "Failed to generate token");
+      //     }
 
-      setToken(data.data.token);
+      //     setToken(data.data.token);
       return true;
     } catch (error) {
       console.error("Error during checkout:", error);
@@ -236,7 +237,7 @@ const CartPage = () => {
 
               <Button
                 disabled={cart.length === 0 || summaryLoading}
-                onClick={handleProceed}
+                onClick={()=>{router.replace(`/checkout/${getOrCreateGuestSessionId()}`)}}
                 className="flex w-full items-center justify-center rounded-lg bg-lime-500 p-2 text-lg font-semibold"
               >
                 {summaryLoading ? "Loading..." : "Proceed to Checkout"}
@@ -273,7 +274,7 @@ const CartPage = () => {
         </div>
       </div>
 
-      {/* 💳 Checkout Summary Modal */}
+      {/* 💳 Checkout Summary Modal
       {showSummary && token && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-[90%] max-w-md p-6 relative">
@@ -297,7 +298,7 @@ const CartPage = () => {
             <CheckoutComponent token={token} />
           </div>
         </div>
-      )}
+      )} */}
     </section>
   );
 };

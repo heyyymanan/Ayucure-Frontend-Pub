@@ -12,6 +12,7 @@ export default function CheckoutFallbackPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-6">
+      
       <div className="max-w-md w-full bg-white shadow-lg rounded-2xl p-6 text-center">
         <div className="flex justify-center mb-4">
           <AlertCircle size={48} className="text-red-500" />
