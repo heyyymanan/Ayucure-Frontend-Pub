@@ -324,6 +324,8 @@ export default function CheckoutPage() {
             order_amount: Number(orderTotal).toFixed(2),
             order_weight: cartWeight.toFixed(4),
             shipping_price: deliveryCharge,
+            discount:savingsAmount,
+            bill_amount: (Number(orderTotal).toFixed(2)-deliveryCharge)
         };
     }, [formData, cart, orderTotal, cartWeight, deliveryCharge]);
 
