@@ -81,44 +81,46 @@ export default function PhoneOtpSection({
   };
 
   const sendOtpHandler = async () => {
-    try {
-      setOtpLoading(true);
-      setOtpMessage("");
+  setOtpLoading(true);
+  setOtpMessage("");
 
-      const phoneErrorCheck = validatePhone(formData?.delivery?.phone);
-      setPhoneError(phoneErrorCheck);
+  const phoneErrorCheck = validatePhone(formData?.delivery?.phone);
+  setPhoneError(phoneErrorCheck);
 
-      if (phoneErrorCheck) {
-        setOtpMessage("⚠️ Enter a valid 10 digit phone number first.");
-        return;
-      }
+  if (phoneErrorCheck) {
+    setOtpMessage("⚠️ Enter a valid 10 digit phone number first.");
+    setOtpLoading(false);
+    return;
+  }
 
-      const phone = getPhoneWithCountry();
-      if (!phone) {
-        setOtpMessage("⚠️ Enter a valid 10 digit phone number first.");
-        return;
-      }
+  const phone = getPhoneWithCountry();
+  if (!phone) {
+    setOtpMessage("⚠️ Enter a valid 10 digit phone number first.");
+    setOtpLoading(false);
+    return;
+  }
 
-      if (!window?.sendOtp) {
-        setOtpMessage("❌ OTP script not loaded. Refresh the page once.");
-        return;
-      }
+  if (!window?.sendOtp) {
+    setOtpMessage("❌ OTP script not loaded. Refresh the page once.");
+    setOtpLoading(false);
+    return;
+  }
 
-      window.sendOtp(
-        phone,
-        () => {
-          setOtpSent(true);
-          setOtpMessage("✅ OTP sent successfully!");
-          setResendTimer(60);
-        },
-        () => {
-          setOtpMessage("❌ Failed to send OTP. Try again.");
-        }
-      );
-    } finally {
-      setOtpLoading(false);
+  window.sendOtp(
+    phone,
+    () => {
+      setOtpSent(true);
+      setOtpMessage("✅ OTP sent successfully!");
+      setResendTimer(60);
+      setOtpLoading(false); // ✅ stop loader here
+    },
+    () => {
+      setOtpMessage("❌ Failed to send OTP. Try again.");
+      setOtpLoading(false); // ✅ stop loader here
     }
-  };
+  );
+};
+
 
   const verifyOtpHandler = async () => {
     try {
@@ -159,7 +161,7 @@ export default function PhoneOtpSection({
             const backendRes = await verifyOtpTokenOnBackend(token);
 
             setOtpVerified(true);
-            setOtpMessage("✅ Phone verified successfully!");
+            setOtpMessage("Phone verified successfully!");
 
             setFormData((prev) => ({
               ...prev,
@@ -230,12 +232,12 @@ export default function PhoneOtpSection({
   };
 
   return (
-    <div className="relative w-full mb-4">
+    <div className={`relative w-full mb-4 ${otpVerified?'bg-gradient-to-t select-none cursor-not-allowed':''} from-green-200 to-lime-300  p-2 rounded-xl`}>
       <label className={labelClass}>Phone</label>
 
       <div className="flex flex-col gap-3">
         <div className="relative flex items-center gap-3">
-          <div className="relative flex-1">
+          <div className={`relative flex-1 `}>
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">
               +91
             </span>
@@ -244,8 +246,9 @@ export default function PhoneOtpSection({
               placeholder="10-Digits"
               value={formData.delivery.phone}
               onChange={handlePhoneChange}
-              className={`${inputClass(phoneError)} pl-10`}
+              className={`${inputClass(phoneError)} pl-10 ${otpVerified?'cursor-not-allowed':''}`}
               maxLength={10}
+              disabled={otpVerified}
             />
           </div>
 
@@ -264,8 +267,8 @@ export default function PhoneOtpSection({
               {otpLoading ? "Sending.." : otpSent ? "OTP Sent !" : "Send OTP"}
             </button>
           ) : (
-            <div className="p-2 flex gap-2 rounded-xl font-semibold text-white bg-green-600 select-none">
-              <CircleCheckBig /> Verified
+            <div className="p-2 flex gap-2 rounded-xl items-center justify-center font-semibold text-white bg-green-600 select-none">
+              <CircleCheckBig size={17}/> Verified
             </div>
           )}
         </div>
