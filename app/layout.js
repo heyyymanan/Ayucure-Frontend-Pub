@@ -5,10 +5,11 @@ import Footer from "@/components/footer.jsx";
 import { CartProvider } from "./context/CartContext.jsx";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
-import Script from "next/script"; // Import the Next.js Script component
+import Script from "next/script";
 
 import ScrollToTop from "./functions/scrollToTop";
 import FloatingCart from "@/components/ui/floating_cart";
+import Msg91OtpScript from "@/components/msg91Inject";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,32 +21,31 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
-
 export default function RootLayout({ children }) {
+ 
   return (
     <html lang="en">
-      
+      <head>
+        {/* ✅ Google Verification meta belongs in head */}
+        <meta
+          name="google-site-verification"
+          content="OgqfdPeXzgaIRi6ZIyf8w4mvNBVxTdagT9SYP9TMeFc"
+        />
 
-      <meta name="google-site-verification" content="OgqfdPeXzgaIRi6ZIyf8w4mvNBVxTdagT9SYP9TMeFc" />
+      <Msg91OtpScript/>
+      </head>
 
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <CartProvider>
           <Navbar />
           <ScrollToTop />
-          <main>{children}</main> 
-          <FloatingCart /> 
+          <main>{children}</main>
+          <FloatingCart />
           <Footer />
         </CartProvider>
 
-       
         <Analytics />
-        <SpeedInsights /> 
-
-      
+        <SpeedInsights />
       </body>
     </html>
   );
