@@ -577,14 +577,14 @@ export default function CheckoutPage() {
 
               {/* Checkout Button */}
               <Button
-                disabled={!isFormValid || loading}
+                disabled={!isFormValid || loading || loadingDelivery}
                 onClick={CreateOrder}
                 className={`
                   w-full py-6 rounded-2xl text-base font-semibold shadow-lg shadow-blue-200 transition-all
                   ${
-                    isFormValid
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    !isFormValid || loading || loadingDelivery
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
                   }
                 `}
               >
