@@ -11,6 +11,7 @@ import ScrollToTop from "./functions/scrollToTop";
 import FloatingCart from "@/components/ui/floating_cart";
 import Msg91OtpScript from "@/components/msg91Inject";
 import TopLoader from "@/components/ui/topLoader";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export default function RootLayout({ children }) {
- 
+
   return (
     <html lang="en">
       <head>
@@ -33,14 +34,16 @@ export default function RootLayout({ children }) {
           content="OgqfdPeXzgaIRi6ZIyf8w4mvNBVxTdagT9SYP9TMeFc"
         />
 
-      <Msg91OtpScript/>
+        <Msg91OtpScript />
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <CartProvider>
           <Navbar />
           <ScrollToTop />
-          <TopLoader />
+          <Suspense>
+            <TopLoader />
+          </Suspense>
           <main>{children}</main>
           <FloatingCart />
           <Footer />
