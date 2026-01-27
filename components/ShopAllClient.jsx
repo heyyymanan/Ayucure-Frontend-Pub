@@ -95,14 +95,14 @@ export default function ShopAllClient({
 
 
       {/* 🔍 Search */}
-      <div className="mb-8 sticky  shadow-md  bg-white py-2 rounded-full  top-28 z-20 mt-5 justify-evenly flex items-center ">
+      <div className="mb-8 sticky  shadow-md  bg-white py-2 rounded-full  top-28 z-20 mt-5 justify-evenly md:justify-center md:w-fit md:gap-5 md:px-4 md:border md:border-black flex items-center ">
         <Search className="" />
         <div className="serch border border-1  rounded-full  flex justify-center items-center">
 
           <input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="kabz, Gas, Cough,..."
+            placeholder="Gas, Digestion,..."
             className="w-full p-2 border border-1 border-black  text-black  rounded-2xl focus:ring-lime-500 focus:ring-2   outline-none  "
           />
 

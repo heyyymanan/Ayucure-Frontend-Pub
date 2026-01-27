@@ -14,6 +14,7 @@ import { useCart } from "@/app/context/CartContext";
 import OTPOnClick from "@/lib/utils/MSG91";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { Search } from "lucide-react";
 
 const navItems = ['Home', 'Shop All', 'About Us', 'Contact Us'];
 
@@ -142,8 +143,13 @@ const Navbar = () => {
           </ul>
         </div>
 
+
         {/* Right Section */}
         <div className="flex items-center gap-3 md:px-2 p-4">
+          <button onClick={()=>{router.replace('/shop-all')}}>
+
+            <Search />
+          </button>
           {/* Cart */}
           <Link href="/cart">
             <div className="relative">
@@ -153,7 +159,7 @@ const Navbar = () => {
               </span>
             </div>
           </Link>
-        {/*
+          {/*
         <div className="relative ml-2" ref={userMenuRef}>
           {isLoggedIn ? (
             <HugeiconsIcon
@@ -169,19 +175,19 @@ const Navbar = () => {
           )}
         */}
 
-        {/* Dropdown */}
-        {isUserOpen && (
-          <div className="absolute right-0 top-10 bg-white text-black rounded shadow-md z-50 w-48 py-2">
-            <div className="px-4 py-2 font-semibold border-b">Hi!</div>
-            <Link href="/user/my-orders" className="block px-4 py-2 hover:bg-gray-100">My Orders</Link>
-            <button
-              onClick={handleLogout}
-              className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
-            >
-              Logout
-            </button>
-          </div>
-        )}
+          {/* Dropdown */}
+          {isUserOpen && (
+            <div className="absolute right-0 top-10 bg-white text-black rounded shadow-md z-50 w-48 py-2">
+              <div className="px-4 py-2 font-semibold border-b">Hi!</div>
+              <Link href="/user/my-orders" className="block px-4 py-2 hover:bg-gray-100">My Orders</Link>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
+              >
+                Logout
+              </button>
+            </div>
+          )}
 
           {/* Mobile Menu Toggle */}
           <div className="lg:hidden block cursor-pointer">
