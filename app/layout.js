@@ -10,6 +10,7 @@ import Script from "next/script";
 import ScrollToTop from "./functions/scrollToTop";
 import FloatingCart from "@/components/ui/floating_cart";
 import Msg91OtpScript from "@/components/msg91Inject";
+import TopLoader from "@/components/ui/topLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({ children }) {
         <CartProvider>
           <Navbar />
           <ScrollToTop />
+          <TopLoader />
           <main>{children}</main>
           <FloatingCart />
           <Footer />

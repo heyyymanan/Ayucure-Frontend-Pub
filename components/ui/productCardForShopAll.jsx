@@ -9,7 +9,7 @@ import Link from "next/link";
 import AddToCartButton from "./addToCartBtn";
 import { useState } from "react";
 
-const ProductCard = ({ product }) => {
+const ProductCardForShopAll = ({ product }) => {
   const fullStars = Math.floor(product.rating);
   const hasHalfStar = product.rating % 1 !== 0;
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
@@ -115,4 +115,4 @@ const ProductCard = ({ product }) => {
   );
 };
 
-export default ProductCard;
+export default ProductCardForShopAll;

@@ -1,10 +1,8 @@
 "use client";
 
-import { React, useEffect, useState } from "react";
+import { React } from "react";
 import { useCart } from "@/app/context/CartContext";
 import { LucideMinusCircle, LucidePlusCircle } from "lucide-react";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { PlusSignCircleFreeIcons } from "@hugeicons/core-free-icons/index";
 
 const AddToCartButton = ({ product, variantSku, ref }) => {
   const {

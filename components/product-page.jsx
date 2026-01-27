@@ -191,7 +191,7 @@ export default function ProductPageClient({ product, selectedVariant }) {
       </section>
 
       {/* Sticky Add to Cart for mobile */}
-      <div className="md:hidden flex justify-evenly items-center fixed bottom-[80px] w-full bg-white border-t z-50">
+      <div className="md:bg-transparent md:border-none flex justify-evenly items-center fixed bottom-[80px] w-full bg-white border-t z-50">
         <div className="md:hidden flex justify-evenly items-center fixed bottom-0 left-0 w-full p-4 bg-white border-t z-50">
           <select
             className="p-2 border rounded-lg"

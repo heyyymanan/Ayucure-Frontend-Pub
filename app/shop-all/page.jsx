@@ -1,49 +1,95 @@
-// app/shop-all/page.jsx ✅ SERVER COMPONENT (SSR)
-
+import { Suspense } from "react";
 import ShopAllClient from "@/components/ShopAllClient";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const LIMIT = 10;
+export const metadata = {
+  title: "Explore Remedies | Shreeji Remedies",
+  description:
+    "Search and browse our premium collection of health and wellness products.",
+};
 
-async function fetchShopAllProducts({ page, remedy_for, price }) {
+const LIMIT = 12;
+
+async function fetchShopAllProducts({ page, remedy_for, price, q }) {
   const base = process.env.NEXT_PUBLIC_API_URL;
 
-  const url =
-    `${base}/general/shop-all` +
-    `?page=${page}&limit=${LIMIT}` +
-    `&remedy_for=${encodeURIComponent(remedy_for || "")}` +
-    `&price=${encodeURIComponent(price || "")}`;
-
-  const res = await fetch(url, {
-    next: { revalidate: 60 }, // ✅ cache 60 seconds (fast + SEO)
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(LIMIT),
   });
 
-  if (!res.ok) {
+  if (remedy_for) params.set("remedy_for", remedy_for);
+  if (price) params.set("price", price);
+  if (q) params.set("q", q);
+
+  try {
+    const res = await fetch(`${base}/general/shop-all?${params.toString()}`, {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch products");
+    return await res.json();
+  } catch (error) {
+    console.error("Fetch Error:", error);
     return { products: [], totalCount: 0 };
   }
-
-  return res.json();
 }
 
 export default async function ShopAllPage({ searchParams }) {
-  const page = Number(searchParams?.page || 1);
-  const remedy_for = searchParams?.remedy_for || "";
-  const price = searchParams?.price || "";
+  const sp = await searchParams;
 
-  const data = await fetchShopAllProducts({ page, remedy_for, price });
+  const page = Math.max(Number(sp?.page || 1), 1);
+  const remedy_for = sp?.remedy_for || "";
+  const price = sp?.price || "";
+  const q = sp?.q || "";
 
-  const products = data?.products || [];
-  const totalCount = data?.totalCount || 0;
-  const totalPages = Math.max(1, Math.ceil(totalCount / LIMIT));
+  const { products, totalCount } = await fetchShopAllProducts({
+    page,
+    remedy_for,
+    price,
+    q,
+  });
 
-  const noProducts = products.length === 0;
+  const totalPages = Math.ceil(totalCount / LIMIT) || 1;
 
   return (
-    <ShopAllClient
-      initialProducts={products}
-      initialPage={page}
-      totalPages={totalPages}
-      initialFilters={{ remedy_for, price }}
-      noProducts={noProducts}
-    />
+    <main className="min-h-screen">
+      {/* Hero (NO SEARCH HERE) */}
+      <section className="pt-5  border-slate-100  md:py-12">
+        <div className="container mx-auto px-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900">
+              Our <span className="text-lime-500">Remedies</span>
+            </h1>
+            <p className="text-slate-500 mt-2 max-w-md">
+              Find the right natural solution for your health needs.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Body */}
+      <div className="container">
+        <Suspense fallback={<ShopSkeleton />}>
+          <ShopAllClient
+            initialProducts={products}
+            initialPage={page}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            initialFilters={{ remedy_for, price, q }}
+          />
+        </Suspense>
+      </div>
+    </main>
+  );
+}
+
+function ShopSkeleton() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {[...Array(8)].map((_, i) => (
+        <Skeleton key={i} className="aspect-[4/5] rounded-2xl" />
+      ))}
+    </div>
   );
 }

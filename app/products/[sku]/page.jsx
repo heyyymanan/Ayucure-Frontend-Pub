@@ -48,7 +48,7 @@ export async function generateMetadata({ params }) {
   return {
     title: `${product.name} - ${shortDesc} - ${siteName}`,
     description: `${shortDesc} | ${remedyFor} | ${keyBenefits} | ${siteName}`,
-    keywords: `${remedyFor}, ${shortDesc}, ${keyBenefits}, ${product.name}, Byna Tablet`,
+    keywords: `${remedyFor}, ${shortDesc}, ${keyBenefits}, ${product.name},${product.keywords}, Byna Tablet`,
     alternates: {
       canonical: productUrl,
     },
