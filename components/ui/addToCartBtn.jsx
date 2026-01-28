@@ -44,7 +44,7 @@ const AddToCartButton = ({ product, variantSku, ref }) => {
       {cartItem ? (
         <div
           ref={ref}
-          className="flex border-2 p-2 border-lime-500 rounded-lg items-center justify-evenly gap-3 sm:gap-4"
+          className="flex border-2 p-2  border-lime-500 rounded-lg items-center justify-evenly gap-3 sm:gap-4"
         >
           <button
             onClick={handleDecrement}

@@ -8,11 +8,13 @@ import gsap from "gsap";
 import Link from "next/link";
 import AddToCartButton from "./addToCartBtn";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const ProductCard = ({ product }) => {
   const fullStars = Math.floor(product.rating);
   const hasHalfStar = product.rating % 1 !== 0;
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+  const router = useRouter();
 
   const buttonRef = useRef(null);
 
@@ -43,18 +45,17 @@ const ProductCard = ({ product }) => {
   }, []);
 
   return (
-    <div className="border rounded-[10px] min-w-44 overflow-clip shadow-md max-w-xs h-auto sm:max-w-sm md:max-w-[275px] bg-white p-1 pb-3 sm:p-4 transition-transform hover:scale-105">
-      <Link href={`/products/${product.variants[0].sku}`}>
-        <div className="relative flex justify-center w-full h-auto sm:h-64 hover:cursor-pointer">
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            width={200}
-            height={200}
-            className="rounded-lg object-contain w-[187px] h-[187px] sm:w-[250px] sm:h-[250px]"
-          />
-        </div>
-      </Link>
+    <div onClick={() => router.push(`/products/${product.variants[0].sku}`)} className="border hover:cursor-pointer rounded-[10px] min-w-44 overflow-clip shadow-md max-w-xs h-auto sm:max-w-sm md:max-w-[275px] bg-white p-1 pb-3 sm:p-4 transition-transform hover:scale-105">
+      <div className="relative flex justify-center w-full h-auto sm:h-64 hover:cursor-pointer">
+        <Image
+          src={product.images[0]}
+          alt={product.name}
+          width={200}
+          height={200}
+          className="rounded-lg  object-contain w-[187px] h-[187px] sm:w-[250px] sm:h-[250px]"
+        />
+      </div>
+
 
       <div className="mt-1 sm:space-y-4">
         <div className="flex justify-between items-center">
@@ -85,19 +86,19 @@ const ProductCard = ({ product }) => {
           </span>
         </div>
 
-        
-          <div className="flex flex-row gap-1 mt-3">
-            <span className="text-[10px] sm:text-sm mx-1 text-gray-700 bg-gray-200 overflow-clip flex gap-2 justify-center items-center rounded-full max-w-52 px-5 sm:py-1">
-              <Image src={"/kharal1.png"} alt="kharal" width={25} height={20} />
-              {product.remedy_for[0]}
-            </span>
 
-            <span className="text-[10px] sm:text-sm mx-1 text-gray-700 bg-gray-200 overflow-clip flex gap-2 justify-center items-center rounded-full max-w-52 px-5 sm:py-1">
-              <Image src={"/kharal1.png"} alt="kharal" width={25} height={20} />
-              ...& More
-            </span>
-          </div>
-         
+        <div className="flex flex-row gap-1 mt-3">
+          <span className="text-[10px] sm:text-sm mx-1 text-gray-700 bg-gray-200 overflow-clip flex gap-2 justify-center items-center rounded-full max-w-52 px-5 sm:py-1">
+            <Image src={"/kharal1.png"} alt="kharal" width={25} height={20} />
+            {product.remedy_for[0]}
+          </span>
+
+          <span className="text-[10px] sm:text-sm mx-1 text-gray-700 bg-gray-200 overflow-clip flex gap-2 justify-center items-center rounded-full max-w-52 px-5 sm:py-1">
+            <Image src={"/kharal1.png"} alt="kharal" width={25} height={20} />
+            ...& More
+          </span>
+        </div>
+
 
         <div className="btm flex gap-2 items-center mt-2 sm:gap-3 justify-around">
           <div className={`flex mx-1 gap-1 md:gap-4 ${Isphone ? "flex-col" : ""} items-center`}>
@@ -105,13 +106,16 @@ const ProductCard = ({ product }) => {
               ₹{product.variants[0].price}
             </span>
 
-            <div className="div h-auto w-fit">
+            <div onClick={(e) => {
+              e.stopPropagation(); // ✅ works now
+            }} className="div h-auto w-fit ">
               <AddToCartButton ref={buttonRef} product={product} variantSku={product.variants[0].sku} />
             </div>
           </div>
         </div>
       </div>
     </div>
+
   );
 };
 

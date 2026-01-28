@@ -10,7 +10,8 @@ export const metadata = {
 
 const LIMIT = 12;
 
-async function fetchShopAllProducts({ page, remedy_for, price, q }) {
+/* 🔥 FETCH PRODUCTS (UPDATED) */
+async function fetchShopAllProducts({ page, category, price, q }) {
   const base = process.env.NEXT_PUBLIC_API_URL;
 
   const params = new URLSearchParams({
@@ -18,14 +19,17 @@ async function fetchShopAllProducts({ page, remedy_for, price, q }) {
     limit: String(LIMIT),
   });
 
-  if (remedy_for) params.set("remedy_for", remedy_for);
+  if (category) params.set("category", category);
   if (price) params.set("price", price);
   if (q) params.set("q", q);
 
   try {
-    const res = await fetch(`${base}/general/shop-all?${params.toString()}`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetch(
+      `${base}/general/shop-all?${params.toString()}`,
+      {
+        next: { revalidate: 60 },
+      }
+    );
 
     if (!res.ok) throw new Error("Failed to fetch products");
     return await res.json();
@@ -35,17 +39,18 @@ async function fetchShopAllProducts({ page, remedy_for, price, q }) {
   }
 }
 
+/* 🔥 PAGE */
 export default async function ShopAllPage({ searchParams }) {
   const sp = await searchParams;
 
   const page = Math.max(Number(sp?.page || 1), 1);
-  const remedy_for = sp?.remedy_for || "";
+  const category = sp?.category || "";
   const price = sp?.price || "";
   const q = sp?.q || "";
 
   const { products, totalCount } = await fetchShopAllProducts({
     page,
-    remedy_for,
+    category,
     price,
     q,
   });
@@ -54,8 +59,8 @@ export default async function ShopAllPage({ searchParams }) {
 
   return (
     <main className="min-h-screen">
-      {/* Hero (NO SEARCH HERE) */}
-      <section className="pt-5  border-slate-100  md:py-12">
+      {/* Hero */}
+      <section className="pt-5 border-slate-100 md:py-12  w-fit pl-10">
         <div className="container mx-auto px-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-black text-slate-900">
@@ -76,7 +81,7 @@ export default async function ShopAllPage({ searchParams }) {
             initialPage={page}
             totalPages={totalPages}
             totalCount={totalCount}
-            initialFilters={{ remedy_for, price, q }}
+            initialFilters={{ category, price, q }}
           />
         </Suspense>
       </div>
@@ -84,6 +89,7 @@ export default async function ShopAllPage({ searchParams }) {
   );
 }
 
+/* 🔹 SKELETON */
 function ShopSkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

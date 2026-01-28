@@ -145,15 +145,15 @@ const Navbar = () => {
 
 
         {/* Right Section */}
-        <div className="flex items-center gap-3 md:px-2 p-4">
-          <button onClick={()=>{router.replace('/shop-all')}}>
+        <div className="flex items-center gap-4 md:px-2  mx-auto md:mx-0">
+          <button onClick={()=>{router.replace('/shop-all')}} className="mr-0 pr-0 ">
 
-            <Search />
+            <Search size={isMobile?23:28}/>
           </button>
           {/* Cart */}
           <Link href="/cart">
-            <div className="relative">
-              <HugeiconsIcon icon={Trolley01FreeIcons} size={isMobile ? 20 : 25} color="currentColor" strokeWidth={1} />
+            <div className="relative  ">
+              <HugeiconsIcon icon={Trolley01FreeIcons} size={isMobile ? 20 : 25} color="currentColor" strokeWidth={2} className="ml-1"/>
               <span className="absolute -top-1 left-4 bg-white text-black border border-black rounded-full w-[17px] h-[17px] text-[11px] flex items-center justify-center font-bold">
                 {cart.length}
               </span>

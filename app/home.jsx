@@ -57,6 +57,8 @@ export default async function Home() {
     <div className="bg-gradient-to-t from-slate-100 to-[#222831]">
       <Hero />
       <hr className="border-t border-gray-500" />
+      <h1 className="w-full flex justify-center text-white py-1 font-serif text-sm">Shop By Concerns</h1>
+      
       <Category />
       <hr className="border-t border-gray-400" />
 

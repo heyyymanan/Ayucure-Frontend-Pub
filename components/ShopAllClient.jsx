@@ -9,7 +9,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import ProductCardForShopAll from "./ui/productCardForShopAll";
+import ProductCard from "./ui/product_card";
 
 /* 🔥 Debounce Hook */
 function useDebounce(value, delay = 400) {
@@ -23,6 +23,21 @@ function useDebounce(value, delay = 400) {
   return debounced;
 }
 
+/* ✅ HARD-CODED REMEDY CATEGORIES */
+const REMEDY_CATEGORIES = [
+  { label: "Stomach & Digestion", value: "digestion" },
+  { label: "Piles & Constipation", value: "piles" },
+  { label: "Joint Pain & Arthritis", value: "joint-pain" },
+  { label: "Hair Fall & Hair Care", value: "hair" },
+  { label: "Skin & Beauty", value: "skin" },
+  { label: "Cold, Cough & Fever", value: "cold-cough" },
+  { label: "Urine / UTI / Kidney", value: "urinary" },
+  { label: "Women’s Health", value: "women" },
+  { label: "Weakness & Immunity", value: "immunity" },
+  { label: "Men’s Health", value: "men" },
+  { label: "Mouth Ulcers", value: "oral" },
+];
+
 export default function ShopAllClient({
   initialProducts,
   initialPage,
@@ -33,22 +48,13 @@ export default function ShopAllClient({
 
   const [filters, setFilters] = useState(initialFilters);
   const [page, setPage] = useState(initialPage);
-  const [remedyOptions, setRemedyOptions] = useState([]);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   /* 🔍 Search */
   const [searchInput, setSearchInput] = useState(initialFilters.q || "");
   const debouncedSearch = useDebounce(searchInput);
 
-  /* ✅ Fetch remedies */
-  useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/general/remedy-options`)
-      .then(res => res.json())
-      .then(data => setRemedyOptions(data))
-      .catch(() => setRemedyOptions([]));
-  }, []);
-
-  /* 🔥 Debounced search trigger */
+  /* 🔥 Debounced Search */
   useEffect(() => {
     if (debouncedSearch !== filters.q) {
       const newFilters = { ...filters, q: debouncedSearch };
@@ -56,14 +62,14 @@ export default function ShopAllClient({
       setPage(1);
       pushUrl(1, newFilters);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, [debouncedSearch]);
 
   const pushUrl = (newPage, newFilters) => {
     const query = new URLSearchParams();
 
     if (newPage > 1) query.set("page", newPage);
-    if (newFilters.remedy_for) query.set("remedy_for", newFilters.remedy_for);
+    if (newFilters.category) query.set("category", newFilters.category);
     if (newFilters.price) query.set("price", newFilters.price);
     if (newFilters.q) query.set("q", newFilters.q);
 
@@ -87,28 +93,18 @@ export default function ShopAllClient({
     }
   };
 
-  /* ---------------- UI ---------------- */
-
   return (
     <div className="max-w-[1440px] mx-auto pb-24 lg:pb-0">
 
-
-
-      {/* 🔍 Search */}
-      <div className="mb-8 sticky  shadow-md  bg-white py-2 rounded-full  top-28 z-20 mt-5 justify-evenly md:justify-center md:w-fit md:gap-5 md:px-4 md:border md:border-black flex items-center ">
-        <Search className="" />
-        <div className="serch border border-1  rounded-full  flex justify-center items-center">
-
-          <input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Gas, Digestion,..."
-            className="w-full p-2 border border-1 border-black  text-black  rounded-2xl focus:ring-lime-500 focus:ring-2   outline-none  "
-          />
-
-        </div>
-
-        {/* 📱 Mobile Floating Filter Bar */}
+      {/* 🔍 Search + Mobile Filter */}
+      <div className="sticky top-28 z-20 bg-white py-2 px-2 mt-5 md:w-fit flex gap-3 justify-center items-center">
+        <Search />
+        <input
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Byna, digestion, joint pain..."
+          className="p-2 border rounded-full w-64"
+        />
 
         <button
           onClick={() => setIsMobileFilterOpen(true)}
@@ -116,18 +112,14 @@ export default function ShopAllClient({
         >
           <Filter size={14} /> Filter
         </button>
-
       </div>
 
-      <div className="flex gap-8">
-        {/* 🖥 Desktop Sidebar */}
+      <div className="flex gap-8 mt-6">
+
+        {/* 🖥 Desktop Filter */}
         <aside className="hidden lg:block w-72">
           <div className="sticky top-24 bg-white p-6 rounded-3xl border">
-            <FilterContent
-              filters={filters}
-              remedyOptions={remedyOptions}
-              handleFilterChange={handleFilterChange}
-            />
+            <FilterContent filters={filters} handleFilterChange={handleFilterChange} />
           </div>
         </aside>
 
@@ -139,31 +131,21 @@ export default function ShopAllClient({
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {initialProducts.map((p) => (
-                  <ProductCardForShopAll key={p._id} product={p} />
+                  <ProductCard key={p._id} product={p} />
                 ))}
               </div>
 
               {/* Pagination */}
               <div className="flex justify-center items-center gap-4 mt-12">
-                <button
-                  disabled={page === 1}
-                  onClick={() => handlePageChange("prev")}
-                  className="p-3 border rounded-full disabled:opacity-30"
-                >
+                <button disabled={page === 1} onClick={() => handlePageChange("prev")}>
                   <ChevronLeft />
                 </button>
 
-                <span className="font-bold">
-                  {page} / {totalPages}
-                </span>
+                <span className="font-bold">{page} / {totalPages}</span>
 
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => handlePageChange("next")}
-                  className="p-3 border rounded-full disabled:opacity-30"
-                >
+                <button disabled={page === totalPages} onClick={() => handlePageChange("next")}>
                   <ChevronRight />
                 </button>
               </div>
@@ -172,28 +154,22 @@ export default function ShopAllClient({
         </main>
       </div>
 
-
-
       {/* 📱 Mobile Filter Drawer */}
       {isMobileFilterOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm">
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-black">Filters</h2>
+        <div className="fixed inset-0 z-[100] bg-black/50">
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6">
+            <div className="flex justify-between mb-4">
+              <h2 className="text-xl font-bold">Filters</h2>
               <button onClick={() => setIsMobileFilterOpen(false)}>
                 <X />
               </button>
             </div>
 
-            <FilterContent
-              filters={filters}
-              remedyOptions={remedyOptions}
-              handleFilterChange={handleFilterChange}
-            />
+            <FilterContent filters={filters} handleFilterChange={handleFilterChange} />
 
             <button
               onClick={() => setIsMobileFilterOpen(false)}
-              className="w-full mt-8 bg-lime-500 text-white py-4 rounded-2xl font-bold"
+              className="w-full mt-6 bg-lime-500 text-white py-3 rounded-xl font-bold"
             >
               Apply Filters
             </button>
@@ -204,39 +180,34 @@ export default function ShopAllClient({
   );
 }
 
-/* ---------------- Filter Content (Shared) ---------------- */
-
-function FilterContent({ filters, remedyOptions, handleFilterChange }) {
+/* 🔹 Shared Filter Content */
+function FilterContent({ filters, handleFilterChange }) {
   return (
     <div className="space-y-6">
-      <h2 className="font-bold text-lg flex items-center gap-2">
-        <Filter size={18} /> Filters
-      </h2>
-
       <div>
-        <label className="text-xs font-bold text-slate-400">Remedy</label>
+        <label className="text-xs font-bold">Health Concern</label>
         <select
-          name="remedy_for"
-          value={filters.remedy_for}
+          name="category"
+          value={filters.category || ""}
           onChange={handleFilterChange}
-          className="w-full mt-2 p-3 rounded-xl border"
+          className="w-full p-3 border rounded-xl mt-2"
         >
-          <option value="">All Remedies</option>
-          {remedyOptions.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
+          <option value="">All Categories</option>
+          {REMEDY_CATEGORIES.map(cat => (
+            <option key={cat.value} value={cat.value}>
+              {cat.label}
             </option>
           ))}
         </select>
       </div>
 
       <div>
-        <label className="text-xs font-bold text-slate-400">Price</label>
+        <label className="text-xs font-bold">Price</label>
         <select
           name="price"
-          value={filters.price}
+          value={filters.price || ""}
           onChange={handleFilterChange}
-          className="w-full mt-2 p-3 rounded-xl border"
+          className="w-full p-3 border rounded-xl mt-2"
         >
           <option value="">Featured</option>
           <option value="low">Low to High</option>
