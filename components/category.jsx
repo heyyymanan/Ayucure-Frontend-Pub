@@ -56,7 +56,7 @@ export default function HealthCategories() {
   }, []);
 
   return (
-    <div className="flex justify-center px-4 py-2 gap-x-5 2xl:gap-15 lg:gap-10 lg:mt-5 lg:mb-7">
+    <div className="flex justify-center px-4 py-2 md:py-0 gap-x-5 2xl:gap-15 lg:gap-10 lg:mt-5 lg:mb-7">
       {Categories.map((category, index) => (
         <Link href={category.link} key={index}>
           <div
