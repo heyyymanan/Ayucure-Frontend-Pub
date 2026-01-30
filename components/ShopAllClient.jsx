@@ -77,6 +77,7 @@ export default function ShopAllClient({
   };
 
   const handleFilterChange = (e) => {
+    setSearchInput("")
     const { name, value } = e.target;
     const newFilters = { ...filters, [name]: value };
     setFilters(newFilters);
@@ -101,7 +102,10 @@ export default function ShopAllClient({
         <Search />
         <input
           value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          onChange={(e) => {
+            setFilters("");
+            setSearchInput(e.target.value);
+          }}
           placeholder="Byna, digestion, joint pain..."
           className="p-2 border rounded-full w-64"
         />
