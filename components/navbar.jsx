@@ -106,7 +106,7 @@ const Navbar = () => {
         </div>
         <div className="hidden md:flex justify-center md:ml-0 md:w-fit items-center text-sm w-full">
           <Link href="/shop-all">
-            Welcome! Get 10% OFF On All Your Purchase. | Shop Now
+            Welcome! Get 5% OFF On All Your Purchase. | Shop Now
           </Link>
         </div>
         <div className={`div ${isLoggedIn ? "" : "ml-20"}`}></div>

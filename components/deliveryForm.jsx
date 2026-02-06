@@ -12,36 +12,40 @@ export default function CheckoutForm({
   const [errors, setErrors] = useState({});
   const [existingCustomer, setExistingCustomer] = useState(null);
   const [showAddressPopup, setShowAddressPopup] = useState(false);
+  // ✅ New State for Validation Popup
+  const [showValidationPopup, setShowValidationPopup] = useState(false); 
   const [phoneLoading, setPhoneLoading] = useState(false);
 
   const isOtpVerified = !!formData?.delivery?.isPhoneVerified;
 
-  /* ------------------- VALIDATION (except phone) ------------------- */
+  /* ------------------- VALIDATION LOGIC ------------------- */
   const validateField = (section, field, value) => {
     let errorMsg = "";
 
+    // Email Validation
     if (section === "contact" && field === "email") {
-      if (!/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(value))
+      const emailValue = value?.trim();
+      if (!emailValue) {
+        errorMsg = "Email is required to send order updates";
+      } else if (!/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(emailValue)) {
         errorMsg = "Invalid email address";
+      }
     }
 
+    // Delivery Validation
     if (section === "delivery") {
       switch (field) {
         case "firstName":
         case "lastName":
-          if (!value)
-            errorMsg = `${
-              field === "firstName" ? "First" : "Last"
-            } name is required`;
-          else if (value.length < 2)
-            errorMsg = `${
-              field === "firstName" ? "First" : "Last"
-            } name must be at least 2 characters`;
+          if (!value?.trim())
+            errorMsg = `${field === "firstName" ? "First" : "Last"} name is required`;
+          else if (value.trim().length < 2)
+            errorMsg = `${field === "firstName" ? "First" : "Last"} name must be at least 2 characters`;
           break;
 
         case "fullAddress":
-          if (!value) errorMsg = "Full address is required";
-          else if (value.length < 10)
+          if (!value?.trim()) errorMsg = "Full address is required";
+          else if (value.trim().length < 10)
             errorMsg = "Address must be at least 10 characters";
           break;
 
@@ -52,11 +56,11 @@ export default function CheckoutForm({
           break;
 
         case "city":
-          if (!value) errorMsg = "City is required";
+          if (!value?.trim()) errorMsg = "City is required";
           break;
 
         case "state":
-          if (!value) errorMsg = "State is required";
+          if (!value?.trim()) errorMsg = "State is required";
           break;
 
         default:
@@ -67,13 +71,64 @@ export default function CheckoutForm({
     return errorMsg;
   };
 
-  /* ------------------- EXISTING CUSTOMER LOOKUP ------------------- */
+  /* ------------------- MASTER VALIDATION ------------------- */
+  const validateForm = () => {
+    const newErrors = {};
+    let isValid = true;
+
+    // 1. Validate Email
+    const emailError = validateField("contact", "email", formData.contact.email);
+    if (emailError) {
+      newErrors.contactEmail = emailError;
+      isValid = false;
+    }
+
+    // 2. Validate Delivery Fields
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "fullAddress",
+      "pincode",
+      "city",
+      "state",
+    ];
+
+    requiredFields.forEach((field) => {
+      const error = validateField("delivery", field, formData.delivery[field]);
+      if (error) {
+        newErrors[`delivery_${field}`] = error;
+        isValid = false;
+      }
+    });
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  /* ------------------- PAYMENT CLICK HANDLER ------------------- */
+  const handlePaymentClick = (method) => {
+    // 1. If method is Online but not available, do nothing
+    if (method === "Online" && !OnlineAvailable) return;
+
+    // 2. Run Validation
+    const isValid = validateForm();
+
+    if (isValid) {
+      // 3. If valid, proceed
+      handlePaymentChange(method);
+    } else {
+      // 4. If invalid, SHOW POPUP instead of alert
+      setShowValidationPopup(true);
+      // Optional: window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  /* ------------------- CUSTOMER LOOKUP & AUTOFILL ------------------- */
   const isPhoneValid = (phone) => /^\d{10}$/.test((phone || "").toString());
 
   const checkCustomerByPhone = async (phone) => {
     try {
       if (!isPhoneValid(phone)) return;
-
       setPhoneLoading(true);
 
       const res = await fetch(
@@ -88,11 +143,7 @@ export default function CheckoutForm({
       if (!res.ok) return;
 
       if (data?.found && data?.user?.address) {
-        const mergedCustomer = {
-          ...data.user,
-          ...data.user.address,
-        };
-
+        const mergedCustomer = { ...data.user, ...data.user.address };
         setExistingCustomer(mergedCustomer);
         setShowAddressPopup(true);
       }
@@ -103,15 +154,10 @@ export default function CheckoutForm({
     }
   };
 
-  /* ------------------- AUTOFILL FIX ------------------- */
   const autofillCustomerDetails = (customer) => {
     if (!customer) return;
-
-    const currentPhone = (formData?.delivery?.phone || "")
-      .toString()
-      .replace(/\D/g, "");
+    const currentPhone = (formData?.delivery?.phone || "").toString().replace(/\D/g, "");
     const customerPhone = (customer?.phone || "").toString().replace(/\D/g, "");
-
     const isSamePhone = currentPhone === customerPhone;
 
     setFormData((prev) => ({
@@ -127,8 +173,6 @@ export default function CheckoutForm({
         city: customer.city || prev.delivery.city,
         state: customer.state || prev.delivery.state,
         country: customer.country || prev.delivery.country,
-
-        // ✅ keep OTP if same phone
         isPhoneVerified: isSamePhone ? prev.delivery.isPhoneVerified : false,
         verifiedPhone: isSamePhone ? prev.delivery.verifiedPhone : "",
       },
@@ -137,30 +181,27 @@ export default function CheckoutForm({
         email: customer.email || prev.contact.email,
       },
     }));
+    setErrors({});
   };
 
-  /* ------------------- INPUT HANDLER ------------------- */
   const handleChangeAndValidate = (section, field) => (e) => {
     handleInputChange(section, field)(e);
-
     const error = validateField(section, field, e.target.value);
     setErrors((prev) => ({
       ...prev,
-      [`${section === "contact" ? "contactEmail" : `delivery_${field}`}`]:
-        error,
+      [`${section === "contact" ? "contactEmail" : `delivery_${field}`}`]: error,
     }));
   };
 
   /* ------------------- STYLES ------------------- */
   const inputClass = (error) => `
-    w-full bg-gray-50 border ${error ? "border-red-500" : "border-gray-200"} 
+    w-full bg-gray-50 border ${error ? "border-red-500 ring-1 ring-red-500" : "border-gray-200"} 
     rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400
     focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
     transition-colors
   `;
 
-  const labelClass =
-    "block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1";
+  const labelClass = "block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1";
 
   if (!cart || cart.length === 0) {
     return (
@@ -172,60 +213,49 @@ export default function CheckoutForm({
 
   return (
     <div className="w-full space-y-8 font-sans border p-5 rounded-3xl border-lime-500 shadow-xl relative">
-      {/* ✅ Popup Modal */}
+      
+      {/* ✅ NEW: Validation Popup */}
+      {showValidationPopup && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl text-center transform transition-all scale-100">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Missing Information</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Please fill all required fields (marked in red) before selecting a payment method.
+            </p>
+            <button
+              onClick={() => setShowValidationPopup(false)}
+              className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition"
+            >
+              Okay, I'll fix it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Returning Customer Popup */}
       {showAddressPopup && existingCustomer && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-5 shadow-xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              Are You a Returning Customer ?
-            </h3>
-
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Are You a Returning Customer?</h3>
             <div className="text-sm text-gray-700 space-y-1 border rounded-xl p-4 bg-gray-50">
-              <p>
-                <b>Name:</b> {existingCustomer.firstName}{" "}
-                {existingCustomer.lastName}
-              </p>
-              <p>
-                <b>Phone:</b> {existingCustomer.phone}
-              </p>
-              <p>
-                <b>Email:</b> {existingCustomer.email || "—"}
-              </p>
-              <p>
-                <b>Address:</b> {existingCustomer.fullAddress}
-              </p>
-              <p>
-                <b>Landmark:</b> {existingCustomer.landmark || "—"}
-              </p>
-              <p>
-                <b>Pincode:</b> {existingCustomer.pincode}
-              </p>
-              <p>
-                <b>City:</b> {existingCustomer.city}
-              </p>
-              <p>
-                <b>State:</b> {existingCustomer.state}
-              </p>
-              <p>
-                <b>Country:</b> {existingCustomer.country}
-              </p>
+              <p><b>Name:</b> {existingCustomer.firstName} {existingCustomer.lastName}</p>
+              <p><b>Phone:</b> {existingCustomer.phone}</p>
+              <p><b>Email:</b> {existingCustomer.email || "—"}</p>
+              <p><b>Address:</b> {existingCustomer.fullAddress}</p>
+              <p><b>Pincode:</b> {existingCustomer.pincode}</p>
+              <p><b>City/State:</b> {existingCustomer.city}, {existingCustomer.state}</p>
             </div>
-
             <div className="flex gap-3 mt-4">
               <button
-                onClick={() => {
-                  autofillCustomerDetails(existingCustomer);
-                  setShowAddressPopup(false);
-                }}
+                onClick={() => { autofillCustomerDetails(existingCustomer); setShowAddressPopup(false); }}
                 className="flex-1 bg-gradient-to-b from-lime-500 to-lime-700 text-white py-3 rounded-xl font-semibold hover:opacity-95 transition"
               >
                 Yes, Autofill
               </button>
-
-              <button
-                onClick={() => setShowAddressPopup(false)}
-                className="flex-1 bg-gradient-to-b from-red-500 to-red-900 text-white py-3 rounded-xl font-semibold hover:opacity-95 transition"
-              >
+              <button onClick={() => setShowAddressPopup(false)} className="flex-1 bg-gradient-to-b from-red-500 to-red-900 text-white py-3 rounded-xl font-semibold hover:opacity-95 transition">
                 No
               </button>
             </div>
@@ -233,21 +263,17 @@ export default function CheckoutForm({
         </div>
       )}
 
-      <h3 className="text-base font-semibold text-gray-900 mb-4">
-        1. Contact Information
-      </h3>
+      <h3 className="text-base font-semibold text-gray-900 mb-4">1. Contact Information</h3>
 
-      {/* ✅ Phone OTP Section */}
       <PhoneOtpSection
         formData={formData}
         setFormData={setFormData}
-        checkCustomerByPhone={checkCustomerByPhone} // ✅ only after otp verified
+        checkCustomerByPhone={checkCustomerByPhone}
         phoneLoading={phoneLoading}
         inputClass={inputClass}
         labelClass={labelClass}
       />
 
-      {/* ✅ Block rest of form until otp verified */}
       {!isOtpVerified && (
         <div className="p-4 rounded-xl bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm text-center font-semibold">
           ⚠️ Please verify your phone number to continue checkout.
@@ -256,7 +282,6 @@ export default function CheckoutForm({
 
       {isOtpVerified && (
         <>
-          {/* ✅ Name + Email */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>First Name</label>
@@ -267,11 +292,7 @@ export default function CheckoutForm({
                 onChange={handleChangeAndValidate("delivery", "firstName")}
                 className={inputClass(errors.delivery_firstName)}
               />
-              {errors.delivery_firstName && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
-                  {errors.delivery_firstName}
-                </p>
-              )}
+              {errors.delivery_firstName && <p className="text-red-500 text-xs mt-1 ml-1">{errors.delivery_firstName}</p>}
             </div>
 
             <div>
@@ -283,31 +304,23 @@ export default function CheckoutForm({
                 onChange={handleChangeAndValidate("delivery", "lastName")}
                 className={inputClass(errors.delivery_lastName)}
               />
-              {errors.delivery_lastName && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
-                  {errors.delivery_lastName}
-                </p>
-              )}
+              {errors.delivery_lastName && <p className="text-red-500 text-xs mt-1 ml-1">{errors.delivery_lastName}</p>}
             </div>
 
             <div>
-              <label className={labelClass}>E-mail</label>
+              <label className={labelClass}>E-mail <span className="text-red-500">*</span></label>
               <input
                 type="email"
                 placeholder="example@gmail.com"
                 value={formData.contact.email}
                 onChange={handleChangeAndValidate("contact", "email")}
+                onBlur={handleChangeAndValidate("contact", "email")}
                 className={inputClass(errors.contactEmail)}
               />
-              {errors.contactEmail && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
-                  {errors.contactEmail}
-                </p>
-              )}
+              {errors.contactEmail && <p className="text-red-500 text-xs mt-1 ml-1 font-bold">{errors.contactEmail}</p>}
             </div>
           </div>
 
-          {/* ✅ Address */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className={labelClass}>Full Address</label>
@@ -318,11 +331,7 @@ export default function CheckoutForm({
                 onChange={handleChangeAndValidate("delivery", "fullAddress")}
                 className={inputClass(errors.delivery_fullAddress)}
               />
-              {errors.delivery_fullAddress && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
-                  {errors.delivery_fullAddress}
-                </p>
-              )}
+              {errors.delivery_fullAddress && <p className="text-red-500 text-xs mt-1 ml-1">{errors.delivery_fullAddress}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -345,11 +354,7 @@ export default function CheckoutForm({
                 onChange={handleChangeAndValidate("delivery", "pincode")}
                 className={inputClass(errors.delivery_pincode)}
               />
-              {errors.delivery_pincode && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
-                  {errors.delivery_pincode}
-                </p>
-              )}
+              {errors.delivery_pincode && <p className="text-red-500 text-xs mt-1 ml-1">{errors.delivery_pincode}</p>}
             </div>
 
             <div>
@@ -361,11 +366,7 @@ export default function CheckoutForm({
                 onChange={handleChangeAndValidate("delivery", "city")}
                 className={inputClass(errors.delivery_city)}
               />
-              {errors.delivery_city && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
-                  {errors.delivery_city}
-                </p>
-              )}
+              {errors.delivery_city && <p className="text-red-500 text-xs mt-1 ml-1">{errors.delivery_city}</p>}
             </div>
 
             <div>
@@ -377,81 +378,42 @@ export default function CheckoutForm({
                 onChange={handleChangeAndValidate("delivery", "state")}
                 className={inputClass(errors.delivery_state)}
               />
-              {errors.delivery_state && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
-                  {errors.delivery_state}
-                </p>
-              )}
+              {errors.delivery_state && <p className="text-red-500 text-xs mt-1 ml-1">{errors.delivery_state}</p>}
             </div>
 
             <div>
               <label className={labelClass}>Country</label>
-              <input
-                disabled
-                type="text"
-                value={formData.delivery.country}
-                className={inputClass(null)}
-              />
+              <input disabled type="text" value={formData.delivery.country} className={inputClass(null)} />
             </div>
           </div>
 
-          {/* ✅ Payment */}
           <div className="pt-2 flex flex-col">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">
-              2. Payment method
-            </h3>
-
+            <h3 className="text-base font-semibold text-gray-900 mb-4">2. Payment method</h3>
             <div className="flex gap-4">
-              {/* Online */}
               <div
-                onClick={() => OnlineAvailable && handlePaymentChange("Online")}
-                className={`
-                  flex-1 min-w-[140px] shadow-xl p-4 rounded-2xl border transition-all cursor-pointer flex flex-col items-center justify-center gap-2
-                  ${
-                    formData.preferences.paymentMethod === "Online"
-                      ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
-                      : "border-gray-200 bg-white hover:border-gray-300"
-                  }
-                  ${!OnlineAvailable ? "opacity-50 cursor-not-allowed" : ""}
-                `}
+                onClick={() => handlePaymentClick("Online")}
+                className={`flex-1 min-w-[140px] shadow-xl p-4 rounded-2xl border transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${formData.preferences.paymentMethod === "Online" ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600" : "border-gray-200 bg-white hover:border-gray-300"
+                  } ${!OnlineAvailable ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <div className="flex -space-x-2">
                   <div className="w-8 h-8 rounded-full bg-red-500 opacity-80" />
                   <div className="w-8 h-8 rounded-full bg-yellow-500 opacity-80" />
                 </div>
                 <span className="font-medium text-sm">Online / UPI</span>
-
-                {OnlineAvailable && (
-                  <span className="text-[10px] text-green-600 font-bold bg-green-100 px-2 py-0.5 rounded-full">
-                    No COD Charges
-                  </span>
-                )}
+                {OnlineAvailable && <span className="text-[10px] text-green-600 font-bold bg-green-100 px-2 py-0.5 rounded-full">No COD Charges</span>}
               </div>
 
-              {/* COD */}
               <div
-                onClick={() => handlePaymentChange("COD")}
-                className={`
-                  flex-1 min-w-[140px] p-4 shadow-xl rounded-2xl border transition-all cursor-pointer flex flex-col items-center justify-center gap-2
-                  ${
-                    formData.preferences.paymentMethod === "COD"
-                      ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
-                      : "border-gray-200 bg-white hover:border-gray-300"
-                  }
-                `}
+                onClick={() => handlePaymentClick("COD")}
+                className={`flex-1 min-w-[140px] p-4 shadow-xl rounded-2xl border transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${formData.preferences.paymentMethod === "COD" ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600" : "border-gray-200 bg-white hover:border-gray-300"
+                  }`}
               >
                 <div className="w-10 h-6 rounded flex items-center justify-center text-[10px] font-bold text-gray-600">
                   <img src="/money.svg" alt="" />
                 </div>
-                <span className="font-medium text-sm text-center hidden md:flex">
-                  Cash On Delivery
-                </span>
-                <span className="flex font-medium text-center text-sm md:hidden">
-                  COD
-                </span>
-                <span className="text-[10px] text-green-600 font-bold bg-green-100 px-2 py-0.5 rounded-full">
-                  COD Charges
-                </span>
+                <span className="font-medium text-sm text-center hidden md:flex">Cash On Delivery</span>
+                <span className="flex font-medium text-center text-sm md:hidden">COD</span>
+                <span className="text-[10px] text-green-600 font-bold bg-green-100 px-2 py-0.5 rounded-full">COD Charges</span>
               </div>
             </div>
           </div>
