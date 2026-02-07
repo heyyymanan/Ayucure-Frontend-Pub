@@ -8,15 +8,15 @@ import {
   Trolley01FreeIcons,
   User03Icon
 } from "@hugeicons/core-free-icons/index";
-import { FaBars } from "react-icons/fa";
+import { FaBars, FaBoxOpen, FaChevronRight } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { useCart } from "@/app/context/CartContext";
-import OTPOnClick from "@/lib/utils/MSG91";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Search } from "lucide-react";
 
 const navItems = ['Home', 'Shop All', 'About Us', 'Contact Us'];
+const navItemsPhone = ['Home', 'Shop All', 'About Us', 'Contact Us'];
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -25,7 +25,9 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Ref attached to the wrapper of the icon + dropdown
   const userMenuRef = useRef(null);
+  const dropDownMenuRef = useRef(null);
   const { cart } = useCart();
   const router = useRouter();
 
@@ -39,7 +41,6 @@ const Navbar = () => {
   useEffect(() => {
     const checkLogin = () => {
       setIsLoggedIn(localStorage.getItem("isLoggedin") === "true");
-
     };
 
     checkLogin();
@@ -59,10 +60,14 @@ const Navbar = () => {
     };
   }, []);
 
+  // Optimized Click Outside Logic
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setIsUserOpen(false);
+      }
+      else if (dropDownMenuRef.current && !dropDownMenuRef.current.contains(e.target)) {
+        setIsMobileMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -81,11 +86,10 @@ const Navbar = () => {
 
       localStorage.removeItem("isLoggedin");
       localStorage.removeItem("user");
-      localStorage.removeItem("isOnboarded")
+      localStorage.removeItem("isOnboarded");
 
       setIsUserOpen(false);
       setIsLoggedIn(false);
-
 
       router.push("/");
     } catch (error) {
@@ -143,51 +147,53 @@ const Navbar = () => {
           </ul>
         </div>
 
-
         {/* Right Section */}
-        <div className="flex items-center gap-4 md:px-2  mx-auto md:mx-0">
-          <button onClick={()=>{router.replace('/shop-all')}} className="mr-0 pr-0 ">
-
-            <Search size={isMobile?23:28}/>
+        <div className="flex items-center gap-4 md:px-2 mx-auto md:mx-0">
+          <button onClick={() => { router.replace('/shop-all') }} className="mr-0 pr-0 ">
+            <Search size={isMobile ? 23 : 28} />
           </button>
+
           {/* Cart */}
           <Link href="/cart">
-            <div className="relative  ">
-              <HugeiconsIcon icon={Trolley01FreeIcons} size={isMobile ? 20 : 25} color="currentColor" strokeWidth={2} className="ml-1"/>
+            <div className="relative">
+              <HugeiconsIcon icon={Trolley01FreeIcons} size={isMobile ? 20 : 25} color="currentColor" strokeWidth={2} className="ml-1" />
               <span className="absolute -top-1 left-4 bg-white text-black border border-black rounded-full w-[17px] h-[17px] text-[11px] flex items-center justify-center font-bold">
                 {cart.length}
               </span>
             </div>
           </Link>
-          {/*
-        <div className="relative ml-2" ref={userMenuRef}>
-          {isLoggedIn ? (
-            <HugeiconsIcon
-              onClick={() => setIsUserOpen(!isUserOpen)}
-              icon={User03Icon}
-              size={isMobile ? 20 : 25}
-              color="currentColor"
-              strokeWidth={2}
-              className="cursor-pointer"
-            />
-          ) : (
-            isMobile ? <></> : <OTPOnClick />
-          )}
-        */}
 
-          {/* Dropdown */}
-          {isUserOpen && (
-            <div className="absolute right-0 top-10 bg-white text-black rounded shadow-md z-50 w-48 py-2">
-              <div className="px-4 py-2 font-semibold border-b">Hi!</div>
-              <Link href="/user/my-orders" className="block px-4 py-2 hover:bg-gray-100">My Orders</Link>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
-              >
-                Logout
-              </button>
+          {/* User Dropdown Section Wrapper */}
+          <div className="relative hidden md:flex  items-center" ref={userMenuRef}>
+            <div className="account">
+              <HugeiconsIcon
+                onClick={() => setIsUserOpen(!isUserOpen)}
+                icon={User03Icon}
+                size={isMobile ? 20 : 25}
+                color="currentColor"
+                strokeWidth={2}
+                className="cursor-pointer"
+              />
             </div>
-          )}
+
+            {isUserOpen && (
+              <div className="absolute select-none right-0 top-10 bg-gradient-to-b from-gray-500 to-gray-800 text-white rounded shadow-md z-50 w-48 py-2">
+
+                <>
+                  <div className="px-4 py-2 font-semibold border-b">Hi!</div>
+                  <Link
+                    href="/user/my-orders"
+                    className="block px-4 py-2 hover:bg-gray-100 hover:text-black rounded-full m-1"
+                    onClick={() => setIsUserOpen(false)}
+                  >
+                    Track Orders
+                  </Link>
+
+                </>
+
+              </div>
+            )}
+          </div>
 
           {/* Mobile Menu Toggle */}
           <div className="lg:hidden block cursor-pointer">
@@ -200,30 +206,53 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Dropdown Menu */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden flex flex-col bg-[#1d1f24] px-6 py-4 space-y-4 text-lg font-serif transition-all duration-300">
-          {navItems.map((item) => (
+      {/* Mobile Menu Wrapper - Place this directly under your Navbar container */}
+      <div
+        className={`lg:hidden absolute top-full left-0 w-full bg-[#1d1f24]/95 backdrop-blur-md border-t border-gray-800 shadow-2xl transition-all duration-300 ease-in-out origin-top z-40 ${isMobileMenuOpen
+          ? "opacity-100 scale-y-100 translate-y-0"
+          : "opacity-0 scale-y-0 -translate-y-2 pointer-events-none"
+          }`}
+      >
+        <div className="flex flex-col px-6 py-6 space-y-2 font-serif"  ref={dropDownMenuRef}>
+         
+
+          {/* Navigation Links */}
+          {navItemsPhone.map((item) => (
             <Link
               key={item}
               href={`/${item.replace(/ /g, "-").toLowerCase()}`}
-              className="hover:text-gray-300 text-center border py-1"
+              className="group flex items-center justify-between py-3 border-b border-gray-700/50 text-gray-200 hover:text-white hover:pl-2 transition-all duration-200"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              {item}
+              <span className="text-lg tracking-wide">{item}</span>
+              {/* Subtle arrow that appears on hover/active */}
+              <FaChevronRight className="text-gray-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
           ))}
-          {isLoggedIn ? (
-            <Link href="/cart" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-gray-300 text-center border py-1">
-              🛒 My Cart
+
+          {/* Track Orders - Styled as a Highlighted Button */}
+          <div className="pt-4 mt-2">
+            <Link
+              href="/user/my-orders" // Updated to match your UserOrders route
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-center gap-2 w-full bg-lime-500 text-black font-bold py-3 rounded-lg shadow-lg hover:bg-lime-400 active:scale-95 transition-all duration-200"
+            >
+              <FaBoxOpen className="text-lg" />
+              <span>Track Your Orders</span>
             </Link>
-          ) : null}
+          </div>
+
         </div>
-      )}
+
+        {/* Optional: Bottom Footer Info (Phone number, etc.) */}
+        <div className="bg-[#15171a] py-3 text-center text-xs text-white font-sans uppercase tracking-widest">
+          © Shreeji Remedies
+        </div>
+      </div>
 
       <hr className="border-t border-gray-700" />
 
-      {/* ✅ Fullscreen Loader Overlay */}
+      {/* Loader Overlay */}
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>

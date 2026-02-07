@@ -98,7 +98,7 @@ export default function ShopAllClient({
     <div className="max-w-[1440px] mx-auto pb-24 lg:pb-0">
 
       {/* 🔍 Search + Mobile Filter */}
-      <div className="sticky top-28 z-20 bg-white py-2 px-2 mt-5 md:w-fit flex gap-3 justify-center items-center">
+      <div className="sticky top-28  bg-white py-2 px-2 mt-5 md:w-fit flex gap-3 justify-center items-center">
         <Search />
         <input
           value={searchInput}
@@ -107,7 +107,7 @@ export default function ShopAllClient({
             setSearchInput(e.target.value);
           }}
           placeholder="Byna, digestion, joint pain..."
-          className="p-2 border rounded-full w-64"
+          className="p-2 border border-black rounded-full w-64"
         />
 
         <button

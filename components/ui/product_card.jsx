@@ -46,7 +46,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <div onClick={() => router.push(`/products/${product.variants[0].sku}`)} className="border hover:cursor-pointer rounded-[10px] min-w-44 overflow-clip shadow-md max-w-xs h-auto sm:max-w-sm md:max-w-[275px] bg-white p-1 pb-3 sm:p-4 transition-transform hover:scale-105">
-      <div className="relative flex justify-center w-full h-auto sm:h-64 hover:cursor-pointer">
+      <div className=" flex justify-center w-full h-auto sm:h-64 hover:cursor-pointer">
         <Image
           src={product.images[0]}
           alt={product.name}
