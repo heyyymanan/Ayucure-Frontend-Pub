@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Star,
   PlusCircle,
@@ -21,13 +21,13 @@ import OTPOnClick from "@/lib/utils/MSG91";
 /* Common Section with collapsible styling */
 function DetailSection({ title, icon, children, collapsible = true }) {
   const [open, setOpen] = useState(true);
-
+  
   return (
     <section className="mb-6">
       <div
         className="flex items-center justify-between cursor-pointer"
         onClick={() => collapsible && setOpen(!open)}
-      >
+        >
         <div className="flex items-center gap-2">
           <span className="p-2 bg-orange-100 rounded-full">{icon}</span>
           <h2 className="text-lg md:text-xl font-semibold font-serif border-b-2 border-orange-500 pb-1">
@@ -52,6 +52,8 @@ export default function ProductPageClient({ product, selectedVariant }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [variant, setVariant] = useState(selectedVariant);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  
+  
 
   const handlePrev = () => {
     setCurrentIndex((prev) =>
@@ -365,6 +367,16 @@ function RemedyList({ remedies }) {
 }
 
 function ReviewsSection({ product, showReviewModal, setShowReviewModal }) {
+  const reviewRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (reviewRef.current && !reviewRef.current.contains(e.target)) {
+        setShowReviewModal(false)
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const [name, setName] = useState("");
   const [rating, setRating] = useState("");
   const [comment, setComment] = useState("");
@@ -457,10 +469,12 @@ function ReviewsSection({ product, showReviewModal, setShowReviewModal }) {
 
       {/* Review Modal */}
       {showReviewModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Submit Your Review</h3>
-            <form onSubmit={handleReviewSubmit} className="flex flex-col gap-3">
+        <div className="fixed  inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white cursor-not-allowed  select-none rounded-xl p-6 w-full max-w-md shadow-lg" ref={reviewRef}>
+          
+            {/* <h3 className="text-lg font-bold mb-4">Submit Your Review</h3> */}
+            <h3 className="text-lg font-bold mb-4">Reviews Are Currently Made Disabled. </h3>
+            {/* <form onSubmit={handleReviewSubmit} className="flex flex-col gap-3">
               <input
                 type="text"
                 placeholder="Your Name"
@@ -504,7 +518,7 @@ function ReviewsSection({ product, showReviewModal, setShowReviewModal }) {
                   Submit
                 </button>
               </div>
-            </form>
+            </form> */}
           </div>
         </div>
       )}
