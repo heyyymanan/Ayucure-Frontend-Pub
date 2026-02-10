@@ -313,6 +313,7 @@ export default function CheckoutPage() {
       bill_amount: billAmount.toFixed(2),
       // Optional: You can pass the selected courier info if your backend supports it
       courier_data: courierInfo || null, 
+      ETA: formatETA(courierInfo.deliveryEstimate)
     };
   }, [formData, cart, orderTotal, cartWeight, deliveryCharge, savingsAmount, courierInfo]);
 
