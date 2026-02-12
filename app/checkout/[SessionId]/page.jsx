@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import CheckoutForm from "@/components/deliveryForm";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import CheckoutTracker, { trackCheckoutEvent } from "@/lib/utils/checkoutTracker";
 
 /* ------------------- Utils ------------------- */
 const isValidPincode = (pin) => /^\d{6}$/.test((pin || "").toString().trim());
@@ -312,7 +313,7 @@ export default function CheckoutPage() {
       discount: Number(savingsAmount || 0),
       bill_amount: billAmount.toFixed(2),
       // Optional: You can pass the selected courier info if your backend supports it
-      courier_data: courierInfo || null, 
+      courier_data: courierInfo || null,
       ETA: formatETA(courierInfo.deliveryEstimate)
     };
   }, [formData, cart, orderTotal, cartWeight, deliveryCharge, savingsAmount, courierInfo]);
@@ -341,7 +342,7 @@ export default function CheckoutPage() {
       } catch (error) {
         alert(
           "Failed to place order: " +
-            (error?.response?.data?.message || error?.message)
+          (error?.response?.data?.message || error?.message)
         );
       } finally {
         setLoading(false);
@@ -353,6 +354,12 @@ export default function CheckoutPage() {
   /* ------------------- Checkout Handler ------------------- */
   const CreateOrder = useCallback(
     async (e) => {
+      trackCheckoutEvent("checkout_order_created", {
+        total: orderTotal,
+        payment: formData.preferences.paymentMethod,
+        shipping: deliveryCharge
+      });
+
       e.preventDefault();
       if (!isFormValid || loading || shippingStatus !== "ready") return;
 
@@ -371,6 +378,13 @@ export default function CheckoutPage() {
   /* ------------------- UI ------------------- */
   return (
     <div className="min-h-screen bg-gray-50/50 p-4 md:p-8">
+      <CheckoutTracker
+        cart={cart}
+        itemTotal={itemTotal}
+        orderTotal={orderTotal}
+        paymentMethod={formData.preferences.paymentMethod}
+      />
+
       <div className="max-w-7xl mx-auto">
         <h1 className="text-2xl font-bold mb-8">Checkout</h1>
 
@@ -440,7 +454,7 @@ export default function CheckoutPage() {
               {courierInfo && shippingStatus === "ready" && (
                 <div className="mt-3 w-full flex justify-center items-center">
                   <span className=" text-xs text-black bg-green-200 w-fit p-1 px-2 rounded-full ">
-                      Delivery Estimated • {" "}
+                    Delivery Estimated • {" "}
                     {formatETA(courierInfo.deliveryEstimate)}
                   </span>
                 </div>
